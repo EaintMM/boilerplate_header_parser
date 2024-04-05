@@ -3,6 +3,7 @@
 
 // init project
 require('dotenv').config();
+//const os =require('os');
 var express = require('express');
 var app = express();
 
@@ -20,9 +21,30 @@ app.get('/', function (req, res) {
 });
 
 // your first API endpoint...
-app.get('/api/hello', function (req, res) {
-  res.json({ greeting: 'hello API' });
+app.get('/api/whoami', function (req, res) {
+  const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  const lang = req.headers['accept-language'];
+  const userAgent = req.headers['user-agent'];
+  const browsedSoftware = parseUserAgent(userAgent);
+  res.json({ 
+    "ipaddress": clientIP,
+    "language": lang,
+    "software": browsedSoftware
+  });
 });
+
+// Function to parse user-agent string and extract browser information
+function parseUserAgent(userAgent) {
+  const result = {};
+  const uaParser = require('ua-parser-js');
+  const parsedUA = uaParser(userAgent);
+
+  result.browser = parsedUA.browser;
+  result.os = parsedUA.os;
+
+  //return result;
+  return parsedUA.browser;
+}
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT || 3000, function () {
